@@ -1,0 +1,52 @@
+[
+  {
+    "name": "Yassa Poulet",
+    "description": "Plat sénégalais à base de poulet mariné, d’oignons, de citron et de moutarde.",
+    "imageUrl": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
+    "category": "Plat",
+    "difficulty": "Moyen",
+    "cookingTimeMinutes": 55,
+    "ingredients": ["Poulet", "Oignons", "Citron", "Moutarde", "Ail", "Huile", "Sel", "Poivre"],
+    "steps": ["Mariner le poulet avec citron, moutarde, ail, sel et poivre.", "Faire revenir les oignons.", "Griller le poulet.", "Mijoter le tout jusqu’à cuisson complète.", "Servir avec du riz blanc."]
+  },
+  {
+    "name": "Thiéboudienne",
+    "description": "Riz au poisson, légumes et sauce tomate, grand classique sénégalais.",
+    "imageUrl": "https://images.unsplash.com/photo-1512058564366-18510be2db19",
+    "category": "Plat",
+    "difficulty": "Difficile",
+    "cookingTimeMinutes": 90,
+    "ingredients": ["Riz", "Poisson", "Tomate", "Carotte", "Chou", "Manioc", "Aubergine", "Poivron"],
+    "steps": ["Préparer la farce du poisson.", "Faire revenir la tomate et les épices.", "Cuire les légumes dans la sauce.", "Retirer les légumes et cuire le riz dans le bouillon.", "Servir avec le poisson et les légumes."]
+  },
+  {
+    "name": "Mafé",
+    "description": "Ragoût onctueux à la pâte d’arachide, servi avec du riz.",
+    "imageUrl": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d",
+    "category": "Plat",
+    "difficulty": "Moyen",
+    "cookingTimeMinutes": 65,
+    "ingredients": ["Viande", "Pâte d’arachide", "Tomate", "Oignons", "Carottes", "Pommes de terre", "Riz"],
+    "steps": ["Faire revenir la viande.", "Ajouter les oignons et la tomate.", "Diluer la pâte d’arachide.", "Ajouter les légumes.", "Laisser mijoter et servir avec du riz."]
+  },
+  {
+    "name": "Fataya",
+    "description": "Petits chaussons frits garnis de poisson ou de viande.",
+    "imageUrl": "https://images.unsplash.com/photo-1625944525533-473f1a3d54e7",
+    "category": "Entrée",
+    "difficulty": "Facile",
+    "cookingTimeMinutes": 40,
+    "ingredients": ["Farine", "Thon", "Oignons", "Ail", "Huile", "Levure", "Sel"],
+    "steps": ["Préparer la pâte.", "Préparer la farce.", "Découper et garnir les chaussons.", "Fermer les bords.", "Frire jusqu’à dorure."]
+  },
+  {
+    "name": "Bouye glacé",
+    "description": "Boisson fraîche au fruit du baobab, douce et nourrissante.",
+    "imageUrl": "https://images.unsplash.com/photo-1544145945-f90425340c7e",
+    "category": "Boisson",
+    "difficulty": "Facile",
+    "cookingTimeMinutes": 10,
+    "ingredients": ["Pain de singe", "Eau", "Sucre", "Lait", "Vanille"],
+    "steps": ["Tremper le pain de singe dans l’eau.", "Filtrer le jus.", "Ajouter sucre, lait et vanille.", "Servir très frais."]
+  }
+]

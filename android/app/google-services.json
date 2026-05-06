@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "978441118466",
+    "project_id": "login-d11f5",
+    "storage_bucket": "login-d11f5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:978441118466:android:fefdfc3248657ec658d81b",
+        "android_client_info": {
+          "package_name": "com.example.recipe_clean_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSAxLeUj_icxRhe2RJMKVU6_TlbE8f3WA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:978441118466:android:76c3399524024daf58d81b",
+        "android_client_info": {
+          "package_name": "com.jeeridev.recipecleanapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSAxLeUj_icxRhe2RJMKVU6_TlbE8f3WA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

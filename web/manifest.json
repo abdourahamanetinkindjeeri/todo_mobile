@@ -1,0 +1,11 @@
+{
+  "name": "Recipe Clean App",
+  "short_name": "Recipes",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#FFF8F2",
+  "theme_color": "#FF6B35",
+  "description": "Application de recettes Flutter",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false
+}
