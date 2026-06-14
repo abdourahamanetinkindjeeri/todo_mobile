@@ -9,6 +9,7 @@ Le projet met l’accent sur une architecture propre, une séparation claire des
 ## Sommaire
 
 - [Aperçu du projet](#aperçu-du-projet)
+- [Lien du projet](#lien-du-projet)
 - [Captures d’écran](#captures-décran)
 - [Fonctionnalités](#fonctionnalités)
 - [Stack technique](#stack-technique)
@@ -33,6 +34,12 @@ Le projet met l’accent sur une architecture propre, une séparation claire des
 **Recipe Clean App** est une application de recettes moderne avec authentification et persistance cloud. L’utilisateur peut créer un compte, se connecter, parcourir les recettes disponibles, chercher une recette, filtrer les recettes par catégorie, ajouter une recette complète et marquer des recettes comme favorites.
 
 L’objectif n’est pas seulement d’avoir une application qui fonctionne, mais d’avoir une base de code propre, maintenable et défendable devant un correcteur ou un jury.
+
+---
+
+## Lien du projet
+
+- [Projet Certification](https://www.figma.com/design/6iYfGbE4gc04nhxffOeIdi/Projet_Certification?node-id=0-1&p=f&t=bgiHMNfEzuPRT4n0-0)
 
 ---
 
