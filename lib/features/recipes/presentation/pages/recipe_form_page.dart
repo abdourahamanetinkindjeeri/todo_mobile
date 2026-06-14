@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../../app/app_routes.dart';
+import '../../../../core/navigation/app_navigation.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../domain/entities/recipe.dart';
 import '../providers/recipe_providers.dart';
+
+const _defaultRecipeImageUrl =
+    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
 
 class RecipeFormPage extends ConsumerStatefulWidget {
   const RecipeFormPage({super.key});
@@ -46,15 +51,16 @@ class _RecipeFormPageState extends ConsumerState<RecipeFormPage> {
     ref.listen(createRecipeControllerProvider, (previous, next) {
       next.whenOrNull(
         error: (error, _) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(error.toString())),
-          );
+          _showMessage(error.toString());
         },
       );
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Nouvelle recette')),
+      appBar: AppBar(
+        leading: const AppBackButton(),
+        title: const Text('Nouvelle recette'),
+      ),
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -155,45 +161,57 @@ class _RecipeFormPageState extends ConsumerState<RecipeFormPage> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final ingredients = _ingredientsController.text
-        .split('\n')
-        .map((line) => line.trim())
-        .where((line) => line.isNotEmpty)
-        .toList();
-    final steps = _stepsController.text
-        .split('\n')
-        .map((line) => line.trim())
-        .where((line) => line.isNotEmpty)
-        .toList();
+    final recipe = _buildRecipe();
+    if (recipe == null) return;
+
+    final success =
+        await ref.read(createRecipeControllerProvider.notifier).createRecipe(
+              recipe,
+            );
+
+    if (success && mounted) {
+      context.popOrGo(AppRoutes.recipes);
+    }
+  }
+
+  Recipe? _buildRecipe() {
+    final ingredients = _readLines(_ingredientsController);
+    final steps = _readLines(_stepsController);
 
     if (ingredients.isEmpty || steps.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ajoute au moins un ingrédient et une étape.')),
-      );
-      return;
+      _showMessage('Ajoute au moins un ingrédient et une étape.');
+      return null;
     }
 
-    final recipe = Recipe(
+    final imageUrl = _imageUrlController.text.trim();
+
+    return Recipe(
       id: '',
-      name: _nameController.text,
-      description: _descriptionController.text,
-      imageUrl: _imageUrlController.text.isEmpty
-          ? 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'
-          : _imageUrlController.text,
-      category: _categoryController.text,
-      difficulty: _difficultyController.text,
-      cookingTimeMinutes: int.parse(_timeController.text),
+      name: _nameController.text.trim(),
+      description: _descriptionController.text.trim(),
+      imageUrl: imageUrl.isEmpty ? _defaultRecipeImageUrl : imageUrl,
+      category: _categoryController.text.trim(),
+      difficulty: _difficultyController.text.trim(),
+      cookingTimeMinutes: int.parse(_timeController.text.trim()),
       ingredients: ingredients,
       steps: steps,
     );
+  }
 
-    final success = await ref
-        .read(createRecipeControllerProvider.notifier)
-        .createRecipe(recipe);
+  List<String> _readLines(TextEditingController controller) {
+    return controller.text
+        .split('\n')
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .toList();
+  }
 
-    if (success && mounted) {
-      context.go('/recipes');
-    }
+  void _showMessage(String message) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 }
 

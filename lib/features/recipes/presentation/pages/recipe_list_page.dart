@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/app_routes.dart';
 import '../../../../app/theme.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/loading_view.dart';
@@ -24,18 +25,19 @@ class RecipeListPage extends ConsumerWidget {
         actions: [
           IconButton(
             tooltip: 'Favoris',
-            onPressed: () => context.go('/favorites'),
+            onPressed: () => context.push(AppRoutes.favorites),
             icon: const Icon(Icons.favorite_rounded),
           ),
           IconButton(
             tooltip: 'Déconnexion',
-            onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+            onPressed: () =>
+                ref.read(authControllerProvider.notifier).signOut(),
             icon: const Icon(Icons.logout_rounded),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/recipes/new'),
+        onPressed: () => context.push(AppRoutes.newRecipe),
         icon: const Icon(Icons.add_rounded),
         label: const Text('Ajouter'),
       ),
@@ -87,7 +89,9 @@ class RecipeListPage extends ConsumerWidget {
                       final recipe = recipes[index];
                       return RecipeCard(
                         recipe: recipe,
-                        onTap: () => context.go('/recipes/${recipe.id}'),
+                        onTap: () => context.push(
+                          AppRoutes.recipeDetail(recipe.id),
+                        ),
                       );
                     },
                     separatorBuilder: (_, __) => const SizedBox(height: 18),

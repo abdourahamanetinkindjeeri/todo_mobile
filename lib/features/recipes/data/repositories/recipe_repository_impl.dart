@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/errors/app_exception.dart';
@@ -19,15 +21,14 @@ class RecipeRepositoryImpl implements RecipeRepository {
 
   @override
   Stream<Recipe> watchRecipeById(String id) {
-    return _remoteDataSource.watchRecipeById(id).handleError(_handleFirestoreError);
+    return _remoteDataSource
+        .watchRecipeById(id)
+        .handleError(_handleFirestoreError);
   }
 
   @override
   Stream<List<Recipe>> watchFavoriteRecipes(String userId) {
-    return _remoteDataSource.watchRecipes().asyncMap((recipes) async {
-      final favorites = await _remoteDataSource.watchFavoriteIds(userId).first;
-      return recipes.where((recipe) => favorites.contains(recipe.id)).toList();
-    }).handleError(_handleFirestoreError);
+    return _watchFavoriteRecipes(userId).handleError(_handleFirestoreError);
   }
 
   @override
@@ -38,18 +39,7 @@ class RecipeRepositoryImpl implements RecipeRepository {
     try {
       await _remoteDataSource.createRecipe(
         userId: userId,
-        recipe: RecipeModel(
-          id: recipe.id,
-          name: recipe.name,
-          description: recipe.description,
-          imageUrl: recipe.imageUrl,
-          category: recipe.category,
-          difficulty: recipe.difficulty,
-          cookingTimeMinutes: recipe.cookingTimeMinutes,
-          ingredients: recipe.ingredients,
-          steps: recipe.steps,
-          ownerId: recipe.ownerId,
-        ),
+        recipe: _toModel(recipe),
       );
     } on FirebaseException catch (e) {
       throw AppException(_firestoreMessage(e));
@@ -62,7 +52,10 @@ class RecipeRepositoryImpl implements RecipeRepository {
     required String recipeId,
   }) async {
     try {
-      await _remoteDataSource.addToFavorites(userId: userId, recipeId: recipeId);
+      await _remoteDataSource.addToFavorites(
+        userId: userId,
+        recipeId: recipeId,
+      );
     } on FirebaseException catch (e) {
       throw AppException(_firestoreMessage(e));
     }
@@ -74,7 +67,10 @@ class RecipeRepositoryImpl implements RecipeRepository {
     required String recipeId,
   }) async {
     try {
-      await _remoteDataSource.removeFromFavorites(userId: userId, recipeId: recipeId);
+      await _remoteDataSource.removeFromFavorites(
+        userId: userId,
+        recipeId: recipeId,
+      );
     } on FirebaseException catch (e) {
       throw AppException(_firestoreMessage(e));
     }
@@ -97,10 +93,76 @@ class RecipeRepositoryImpl implements RecipeRepository {
     throw AppException('Erreur Firestore: $error');
   }
 
+  Stream<List<Recipe>> _watchFavoriteRecipes(String userId) {
+    StreamSubscription<List<RecipeModel>>? recipesSubscription;
+    StreamSubscription<List<String>>? favoritesSubscription;
+
+    List<RecipeModel>? recipes;
+    Set<String>? favoriteIds;
+
+    late final StreamController<List<Recipe>> controller;
+
+    void emitFavorites() {
+      final currentRecipes = recipes;
+      final currentFavoriteIds = favoriteIds;
+
+      if (currentRecipes == null || currentFavoriteIds == null) return;
+      if (controller.isClosed) return;
+
+      controller.add(
+        currentRecipes
+            .where((recipe) => currentFavoriteIds.contains(recipe.id))
+            .toList(),
+      );
+    }
+
+    controller = StreamController<List<Recipe>>(
+      onListen: () {
+        recipesSubscription = _remoteDataSource.watchRecipes().listen(
+          (value) {
+            recipes = value;
+            emitFavorites();
+          },
+          onError: controller.addError,
+        );
+
+        favoritesSubscription =
+            _remoteDataSource.watchFavoriteIds(userId).listen(
+          (value) {
+            favoriteIds = value.toSet();
+            emitFavorites();
+          },
+          onError: controller.addError,
+        );
+      },
+      onCancel: () async {
+        await recipesSubscription?.cancel();
+        await favoritesSubscription?.cancel();
+      },
+    );
+
+    return controller.stream;
+  }
+
+  RecipeModel _toModel(Recipe recipe) {
+    return RecipeModel(
+      id: recipe.id,
+      name: recipe.name,
+      description: recipe.description,
+      imageUrl: recipe.imageUrl,
+      category: recipe.category,
+      difficulty: recipe.difficulty,
+      cookingTimeMinutes: recipe.cookingTimeMinutes,
+      ingredients: recipe.ingredients,
+      steps: recipe.steps,
+      ownerId: recipe.ownerId,
+    );
+  }
+
   String _firestoreMessage(FirebaseException e) {
     switch (e.code) {
       case 'permission-denied':
-        return 'Accès Firestore refusé. Publie les règles fournies dans firestore.rules.';
+        return 'Accès Firestore refusé. Déploie les règles du fichier firestore.rules sur le projet Firebase.';
       case 'unavailable':
         return 'Firestore est indisponible. Vérifie ta connexion.';
       default:

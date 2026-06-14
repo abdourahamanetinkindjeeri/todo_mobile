@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'app_routes.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/register_page.dart';
 import '../features/auth/presentation/providers/auth_providers.dart';
@@ -14,54 +15,52 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
 
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: AppRoutes.splash,
     redirect: (context, state) {
       final location = state.matchedLocation;
-      final isAuthRoute = location == '/login' || location == '/register';
-      final isSplashRoute = location == '/';
+      final isAuthRoute =
+          location == AppRoutes.login || location == AppRoutes.register;
+      final isSplashRoute = location == AppRoutes.splash;
 
-      // Tant que Firebase Auth n'a pas encore répondu, on reste sur le splash.
       if (authState.isLoading || authState.hasError) {
-        return isSplashRoute ? null : '/';
+        return isSplashRoute ? null : AppRoutes.splash;
       }
 
       final user = authState.valueOrNull;
 
-      // Correction importante : après un login réussi ou au redémarrage de l'app,
-      // la route '/' ne doit pas rester bloquée sur le spinner du SplashPage.
       if (isSplashRoute) {
-        return user == null ? '/login' : '/recipes';
+        return user == null ? AppRoutes.login : AppRoutes.recipes;
       }
 
       if (user == null && !isAuthRoute) {
-        return '/login';
+        return AppRoutes.login;
       }
 
       if (user != null && isAuthRoute) {
-        return '/recipes';
+        return AppRoutes.recipes;
       }
 
       return null;
     },
     routes: [
       GoRoute(
-        path: '/',
+        path: AppRoutes.splash,
         builder: (context, state) => const SplashPage(),
       ),
       GoRoute(
-        path: '/login',
+        path: AppRoutes.login,
         builder: (context, state) => const LoginPage(),
       ),
       GoRoute(
-        path: '/register',
+        path: AppRoutes.register,
         builder: (context, state) => const RegisterPage(),
       ),
       GoRoute(
-        path: '/recipes',
+        path: AppRoutes.recipes,
         builder: (context, state) => const RecipeListPage(),
       ),
       GoRoute(
-        path: '/recipes/new',
+        path: AppRoutes.newRecipe,
         builder: (context, state) => const RecipeFormPage(),
       ),
       GoRoute(
@@ -71,7 +70,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
-        path: '/favorites',
+        path: AppRoutes.favorites,
         builder: (context, state) => const FavoritesPage(),
       ),
     ],

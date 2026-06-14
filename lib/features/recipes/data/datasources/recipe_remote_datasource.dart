@@ -2,6 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/recipe_model.dart';
 
+abstract final class FirestoreCollections {
+  static const recipes = 'recipes';
+  static const favorites = 'favorites';
+}
+
 class RecipeRemoteDataSource {
   final FirebaseFirestore _firestore;
 
@@ -9,13 +14,11 @@ class RecipeRemoteDataSource {
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> get _recipes =>
-      _firestore.collection('recipes');
+      _firestore.collection(FirestoreCollections.recipes);
 
   Stream<List<RecipeModel>> watchRecipes() {
     return _recipes.snapshots().map(
-          (snapshot) => snapshot.docs
-              .map(RecipeModel.fromFirestore)
-              .toList()
+          (snapshot) => snapshot.docs.map(RecipeModel.fromFirestore).toList()
             ..sort((a, b) => a.name.compareTo(b.name)),
         );
   }
@@ -33,9 +36,9 @@ class RecipeRemoteDataSource {
 
   Stream<List<String>> watchFavoriteIds(String userId) {
     return _firestore
-        .collection('favorites')
+        .collection(FirestoreCollections.favorites)
         .doc(userId)
-        .collection('recipes')
+        .collection(FirestoreCollections.recipes)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) => doc.id).toList());
   }
@@ -45,9 +48,9 @@ class RecipeRemoteDataSource {
     required String recipeId,
   }) {
     return _firestore
-        .collection('favorites')
+        .collection(FirestoreCollections.favorites)
         .doc(userId)
-        .collection('recipes')
+        .collection(FirestoreCollections.recipes)
         .doc(recipeId)
         .set({
       'recipeId': recipeId,
@@ -60,9 +63,9 @@ class RecipeRemoteDataSource {
     required String recipeId,
   }) {
     return _firestore
-        .collection('favorites')
+        .collection(FirestoreCollections.favorites)
         .doc(userId)
-        .collection('recipes')
+        .collection(FirestoreCollections.recipes)
         .doc(recipeId)
         .delete();
   }
@@ -72,9 +75,9 @@ class RecipeRemoteDataSource {
     required String recipeId,
   }) {
     return _firestore
-        .collection('favorites')
+        .collection(FirestoreCollections.favorites)
         .doc(userId)
-        .collection('recipes')
+        .collection(FirestoreCollections.recipes)
         .doc(recipeId)
         .snapshots()
         .map((doc) => doc.exists);

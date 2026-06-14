@@ -265,8 +265,10 @@ recipes/{recipeId}
 | cookingTimeMinutes | number | Temps de cuisson en minutes |
 | ingredients | array<string> | Liste des ingrédients |
 | steps | array<string> | Étapes de préparation |
+| ownerId | string | Identifiant du propriétaire |
+| createdBy | string | Identifiant du créateur, conservé pour compatibilité |
 | createdAt | timestamp | Date de création |
-| createdBy | string | Identifiant de l’utilisateur créateur |
+| updatedAt | timestamp | Date de mise à jour |
 
 ### Sous-collection des favoris
 
@@ -285,32 +287,14 @@ Cette structure permet de séparer les favoris par utilisateur. C’est plus pro
 
 ## Règles de sécurité Firestore
 
-Pour un projet académique, ces règles sont suffisantes pour protéger les données utilisateur tout en permettant la lecture et l’écriture des recettes par les utilisateurs connectés.
+Les règles maintenues dans ce projet sont dans le fichier `firestore.rules`.
+Elles autorisent la lecture des recettes uniquement aux utilisateurs connectés,
+valident les champs écrits dans `recipes`, et limitent les favoris au propriétaire.
 
-```js
-rules_version = '2';
+Pour appliquer ces règles au projet Firebase configuré :
 
-service cloud.firestore {
-  match /databases/{database}/documents {
-
-    match /recipes/{recipeId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null
-        && request.resource.data.createdBy == request.auth.uid;
-    }
-
-    match /users/{userId} {
-      allow read, write: if request.auth != null
-        && request.auth.uid == userId;
-    }
-
-    match /favorites/{userId}/recipes/{recipeId} {
-      allow read, write, delete: if request.auth != null
-        && request.auth.uid == userId;
-    }
-  }
-}
+```bash
+firebase deploy --only firestore:rules --project login-d11f5
 ```
 
 > Pour une application en production, il faudrait renforcer davantage les règles de validation des champs, limiter les écritures et prévoir des rôles administrateurs.
@@ -528,10 +512,10 @@ set -Ux PATH $PATH $HOME/.pub-cache/bin
 
 Cela signifie que les règles Firestore refusent l’opération.
 
-Solution : vérifier les règles dans Firebase Console :
+Solution : publier le fichier `firestore.rules` sur le bon projet Firebase :
 
-```text
-Firebase Console → Firestore Database → Rules
+```bash
+firebase deploy --only firestore:rules --project login-d11f5
 ```
 
 ---

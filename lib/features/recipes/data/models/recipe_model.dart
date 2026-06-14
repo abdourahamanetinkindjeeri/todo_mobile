@@ -35,9 +35,9 @@ class RecipeModel extends Recipe {
       category: (data['category'] ?? 'Plat').toString(),
       difficulty: (data['difficulty'] ?? 'Facile').toString(),
       cookingTimeMinutes: (data['cookingTimeMinutes'] as num?)?.toInt() ?? 30,
-      ingredients: List<String>.from(data['ingredients'] ?? const []),
-      steps: List<String>.from(data['steps'] ?? const []),
-      ownerId: data['ownerId']?.toString(),
+      ingredients: _readStringList(data['ingredients']),
+      steps: _readStringList(data['steps']),
+      ownerId: (data['ownerId'] ?? data['createdBy'])?.toString(),
     );
   }
 
@@ -49,11 +49,25 @@ class RecipeModel extends Recipe {
       'category': category.trim(),
       'difficulty': difficulty.trim(),
       'cookingTimeMinutes': cookingTimeMinutes,
-      'ingredients': ingredients.map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
-      'steps': steps.map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+      'ingredients': _cleanLines(ingredients),
+      'steps': _cleanLines(steps),
       'ownerId': ownerId,
+      'createdBy': ownerId,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     };
+  }
+
+  static List<String> _readStringList(Object? value) {
+    if (value is! Iterable) return const [];
+
+    return value.map((item) => item.toString()).toList();
+  }
+
+  static List<String> _cleanLines(List<String> lines) {
+    return lines
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .toList();
   }
 }

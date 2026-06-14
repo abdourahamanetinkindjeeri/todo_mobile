@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/app_routes.dart';
 import '../../../../app/theme.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -40,7 +41,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (!mounted) return;
 
     state.when(
-      data: (_) => context.go('/recipes'),
+      data: (_) => context.go(AppRoutes.recipes),
       loading: () {},
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(error.toString())),
@@ -106,7 +107,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         const SizedBox(height: 16),
                         Center(
                           child: TextButton(
-                            onPressed: () => context.go('/register'),
+                            onPressed: () => context.push(AppRoutes.register),
                             child: const Text('Créer un compte'),
                           ),
                         ),

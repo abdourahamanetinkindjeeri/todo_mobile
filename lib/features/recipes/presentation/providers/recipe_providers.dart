@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/app_exception.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../application/usecases/filter_recipes_use_case.dart';
 import '../../data/repositories/recipe_repository_impl.dart';
 import '../../domain/entities/recipe.dart';
 import '../../domain/repositories/recipe_repository.dart';
@@ -14,30 +15,33 @@ final recipesProvider = StreamProvider<List<Recipe>>((ref) {
   return ref.watch(recipeRepositoryProvider).watchRecipes();
 });
 
+final filterRecipesUseCaseProvider = Provider<FilterRecipesUseCase>((ref) {
+  return FilterRecipesUseCase();
+});
+
 final recipeSearchQueryProvider = StateProvider<String>((ref) => '');
-final recipeCategoryProvider = StateProvider<String>((ref) => 'Toutes');
+final recipeCategoryProvider = StateProvider<String>(
+  (ref) => FilterRecipesUseCase.allCategory,
+);
 
 final filteredRecipesProvider = Provider<AsyncValue<List<Recipe>>>((ref) {
   final recipesAsync = ref.watch(recipesProvider);
-  final query = ref.watch(recipeSearchQueryProvider).trim().toLowerCase();
-  final category = ref.watch(recipeCategoryProvider);
+  final filterRecipes = ref.watch(filterRecipesUseCaseProvider);
+  final criteria = RecipeFilterCriteria(
+    query: ref.watch(recipeSearchQueryProvider),
+    category: ref.watch(recipeCategoryProvider),
+  );
 
   return recipesAsync.whenData((recipes) {
-    return recipes.where((recipe) {
-      final matchesQuery = query.isEmpty ||
-          recipe.name.toLowerCase().contains(query) ||
-          recipe.description.toLowerCase().contains(query) ||
-          recipe.ingredients.any((item) => item.toLowerCase().contains(query));
-      final matchesCategory = category == 'Toutes' || recipe.category == category;
-      return matchesQuery && matchesCategory;
-    }).toList();
+    return filterRecipes(recipes: recipes, criteria: criteria);
   });
 });
 
 final recipeCategoriesProvider = Provider<List<String>>((ref) {
   final recipes = ref.watch(recipesProvider).valueOrNull ?? const <Recipe>[];
-  final categories = recipes.map((recipe) => recipe.category).toSet().toList()..sort();
-  return ['Toutes', ...categories];
+  final categories = recipes.map((recipe) => recipe.category).toSet().toList()
+    ..sort();
+  return [FilterRecipesUseCase.allCategory, ...categories];
 });
 
 final recipeByIdProvider = StreamProvider.family<Recipe, String>((ref, id) {
@@ -75,7 +79,10 @@ class FavoriteController extends StateNotifier<AsyncValue<void>> {
   }) async {
     final user = _ref.read(authStateProvider).valueOrNull;
     if (user == null) {
-      state = AsyncError(const AppException('Connecte-toi pour gérer les favoris.'), StackTrace.current);
+      state = AsyncError(
+        const AppException('Connecte-toi pour gérer les favoris.'),
+        StackTrace.current,
+      );
       return;
     }
 
@@ -83,7 +90,10 @@ class FavoriteController extends StateNotifier<AsyncValue<void>> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() {
       if (isFavorite) {
-        return repository.removeFromFavorites(userId: user.id, recipeId: recipeId);
+        return repository.removeFromFavorites(
+          userId: user.id,
+          recipeId: recipeId,
+        );
       }
       return repository.addToFavorites(userId: user.id, recipeId: recipeId);
     });
@@ -103,7 +113,8 @@ class CreateRecipeController extends StateNotifier<AsyncValue<void>> {
   Future<bool> createRecipe(Recipe recipe) async {
     final user = _ref.read(authStateProvider).valueOrNull;
     if (user == null) {
-      state = AsyncError(const AppException('Utilisateur non connecté.'), StackTrace.current);
+      state = AsyncError(
+          const AppException('Utilisateur non connecté.'), StackTrace.current);
       return false;
     }
 

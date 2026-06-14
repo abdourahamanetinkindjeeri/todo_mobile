@@ -58,9 +58,15 @@ class RecipeCard extends ConsumerWidget {
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          _Badge(icon: Icons.category_rounded, label: recipe.category),
-                          _Badge(icon: Icons.timer_rounded, label: '${recipe.cookingTimeMinutes} min'),
-                          _Badge(icon: Icons.speed_rounded, label: recipe.difficulty),
+                          _Badge(
+                              icon: Icons.category_rounded,
+                              label: recipe.category),
+                          _Badge(
+                              icon: Icons.timer_rounded,
+                              label: '${recipe.cookingTimeMinutes} min'),
+                          _Badge(
+                              icon: Icons.speed_rounded,
+                              label: recipe.difficulty),
                         ],
                       ),
                       const SizedBox(height: 12),
@@ -82,13 +88,17 @@ class RecipeCard extends ConsumerWidget {
                 ),
                 IconButton.filledTonal(
                   onPressed: () {
-                    ref.read(favoriteControllerProvider.notifier).toggleFavorite(
+                    ref
+                        .read(favoriteControllerProvider.notifier)
+                        .toggleFavorite(
                           recipeId: recipe.id,
                           isFavorite: isFavorite,
                         );
                   },
                   icon: Icon(
-                    isFavorite ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
+                    isFavorite
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_outline_rounded,
                   ),
                 ),
               ],
@@ -111,7 +121,7 @@ class _Badge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.orange.withOpacity(0.10),
+        color: Colors.orange.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -119,7 +129,9 @@ class _Badge extends StatelessWidget {
         children: [
           Icon(icon, size: 14),
           const SizedBox(width: 4),
-          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+          Text(label,
+              style:
+                  const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
         ],
       ),
     );

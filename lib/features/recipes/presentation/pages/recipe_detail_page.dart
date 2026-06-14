@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/glass_card.dart';
 import '../../../../core/widgets/loading_view.dart';
@@ -15,10 +16,13 @@ class RecipeDetailPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final recipeAsync = ref.watch(recipeByIdProvider(recipeId));
-    final isFavorite = ref.watch(isFavoriteProvider(recipeId)).valueOrNull ?? false;
+    final isFavorite =
+        ref.watch(isFavoriteProvider(recipeId)).valueOrNull ?? false;
 
     return Scaffold(
       appBar: AppBar(
+        leading: const AppBackButton(),
+        title: const Text('Détails'),
         actions: [
           IconButton.filledTonal(
             onPressed: () {
@@ -28,7 +32,9 @@ class RecipeDetailPage extends ConsumerWidget {
                   );
             },
             icon: Icon(
-              isFavorite ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
+              isFavorite
+                  ? Icons.favorite_rounded
+                  : Icons.favorite_outline_rounded,
             ),
           ),
           const SizedBox(width: 12),
@@ -64,9 +70,18 @@ class RecipeDetailPage extends ConsumerWidget {
               spacing: 10,
               runSpacing: 10,
               children: [
-                Chip(label: Text(recipe.category), avatar: const Icon(Icons.category_rounded, size: 18)),
-                Chip(label: Text('${recipe.cookingTimeMinutes} min'), avatar: const Icon(Icons.timer_rounded, size: 18)),
-                Chip(label: Text(recipe.difficulty), avatar: const Icon(Icons.speed_rounded, size: 18)),
+                Chip(
+                  label: Text(recipe.category),
+                  avatar: const Icon(Icons.category_rounded, size: 18),
+                ),
+                Chip(
+                  label: Text('${recipe.cookingTimeMinutes} min'),
+                  avatar: const Icon(Icons.timer_rounded, size: 18),
+                ),
+                Chip(
+                  label: Text(recipe.difficulty),
+                  avatar: const Icon(Icons.speed_rounded, size: 18),
+                ),
               ],
             ),
             const SizedBox(height: 22),
@@ -105,28 +120,31 @@ class RecipeDetailPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   ...recipe.steps.asMap().entries.map(
-                    (entry) => Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          CircleAvatar(
-                            radius: 14,
-                            child: Text('${entry.key + 1}'),
+                        (entry) => Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CircleAvatar(
+                                radius: 14,
+                                child: Text('${entry.key + 1}'),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(child: Text(entry.value)),
+                            ],
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(child: Text(entry.value)),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
                 ],
               ),
             ),
           ],
         ),
         loading: () => const LoadingView(),
-        error: (error, _) => ErrorView(error: error),
+        error: (error, _) => ErrorView(
+          error: error,
+          onRetry: () => ref.invalidate(recipeByIdProvider(recipeId)),
+        ),
       ),
     );
   }

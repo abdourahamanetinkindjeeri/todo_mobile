@@ -11,18 +11,67 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == userId;
     }
 
+    function validRecipeOwner(data) {
+      return signedIn()
+        && data.ownerId == request.auth.uid
+        && data.createdBy == request.auth.uid;
+    }
+
+    function ownsRecipe(data) {
+      return signedIn()
+        && (data.ownerId == request.auth.uid || data.createdBy == request.auth.uid);
+    }
+
+    function validRecipePayload(data) {
+      return data.keys().hasAll([
+          'name',
+          'description',
+          'imageUrl',
+          'category',
+          'difficulty',
+          'cookingTimeMinutes',
+          'ingredients',
+          'steps',
+          'ownerId',
+          'createdBy'
+        ])
+        && data.keys().hasOnly([
+          'name',
+          'description',
+          'imageUrl',
+          'category',
+          'difficulty',
+          'cookingTimeMinutes',
+          'ingredients',
+          'steps',
+          'ownerId',
+          'createdBy',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.name is string
+        && data.description is string
+        && data.imageUrl is string
+        && data.category is string
+        && data.difficulty is string
+        && data.cookingTimeMinutes is number
+        && data.cookingTimeMinutes > 0
+        && data.ingredients is list
+        && data.steps is list
+        && validRecipeOwner(data);
+    }
+
     match /recipes/{recipeId} {
       allow read: if signedIn();
 
-      allow create: if signedIn()
-        && request.resource.data.ownerId == request.auth.uid
-        && request.resource.data.name is string
-        && request.resource.data.description is string
-        && request.resource.data.ingredients is list
-        && request.resource.data.steps is list;
+      allow create: if validRecipePayload(request.resource.data);
 
-      allow update, delete: if signedIn()
-        && resource.data.ownerId == request.auth.uid;
+      allow update: if ownsRecipe(resource.data)
+        && validRecipePayload(request.resource.data)
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.createdBy == resource.data.createdBy;
+
+      allow delete: if ownsRecipe(resource.data);
     }
 
     match /users/{userId} {
@@ -31,7 +80,11 @@ service cloud.firestore {
     }
 
     match /favorites/{userId}/recipes/{recipeId} {
-      allow read, create, update, delete: if isOwner(userId);
+      allow read, delete: if isOwner(userId);
+
+      allow create, update: if isOwner(userId)
+        && request.resource.data.keys().hasOnly(['recipeId', 'savedAt'])
+        && request.resource.data.recipeId == recipeId;
     }
   }
 }

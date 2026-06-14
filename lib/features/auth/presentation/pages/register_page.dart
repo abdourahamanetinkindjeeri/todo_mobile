@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/app_routes.dart';
+import '../../../../core/navigation/app_navigation.dart';
 import '../../../../app/theme.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/glass_card.dart';
@@ -45,7 +48,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     if (!mounted) return;
 
     state.when(
-      data: (_) => context.go('/recipes'),
+      data: (_) => context.go(AppRoutes.recipes),
       loading: () {},
       error: (error, _) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(error.toString())),
@@ -58,7 +61,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final authState = ref.watch(authControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: const AppBackButton(fallbackLocation: AppRoutes.login),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: GlassCard(
@@ -85,7 +90,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   controller: _nameController,
                   label: 'Nom complet',
                   icon: Icons.person_outline_rounded,
-                  validator: (value) => Validators.required(value, field: 'Nom'),
+                  validator: (value) =>
+                      Validators.required(value, field: 'Nom'),
                 ),
                 const SizedBox(height: 14),
                 AppTextField(
@@ -128,7 +134,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 const SizedBox(height: 16),
                 Center(
                   child: TextButton(
-                    onPressed: () => context.go('/login'),
+                    onPressed: () => context.popOrGo(AppRoutes.login),
                     child: const Text('J’ai déjà un compte'),
                   ),
                 ),
